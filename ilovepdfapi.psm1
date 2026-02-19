@@ -138,6 +138,8 @@ class FileModel {
 }
 
 class iLovePdfTask {
+  [string]$_publicKey
+  [string]$_privateKey
   [Uri]$ServerUrl
   [string]$TaskId
   hidden [List[FileModel]]$Files
@@ -163,6 +165,40 @@ class iLovePdfTask {
       $model.FileName = $kvp.Value
       $this.Files.Add($model)
     }
+  }
+
+  [UploadTaskResponse] UploadFile([string]$filePath) {
+    $res = [RequestHelper]::UploadFile($this._publicKey, $this._privateKey, $this.ServerUrl, $this.TaskId, $filePath)
+    $model = [FileModel]::new()
+    $model.ServerFileName = $res.ServerFileName
+    $model.FileName = [System.IO.Path]::GetFileName($filePath)
+    $this.Files.Add($model)
+    return $res
+  }
+
+  [ExecuteTaskResponse] Process([BaseParams]$parameters) {
+    $res = [RequestHelper]::ExecuteTask($this._publicKey, $this._privateKey, $this.ServerUrl, $this.TaskId, $this.Files, $this.GetToolName(), $parameters)
+    $this.Files.Clear()
+    return $res
+  }
+
+  [void] DownloadFile([string]$destination) {
+    [RequestHelper]::Download($this._publicKey, $this._privateKey, $this.ServerUrl, $this.TaskId, $destination)
+  }
+}
+
+class CompressTask : iLovePdfTask {
+  CompressTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Compress.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process([CompressParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [CompressParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
   }
 }
 
@@ -341,6 +377,9 @@ class ilovepdfapi {
     }
 
     $instance = $TaskType::new()
+    $instance._publicKey = $this._publicKey
+    $instance._privateKey = $this._privateKey
+
     $response = [RequestHelper]::StartTask($this._publicKey, $this._privateKey, $instance.GetToolName())
 
     $serverUrl = "https://$($response.Server)/"
@@ -355,6 +394,9 @@ class ilovepdfapi {
     }
 
     $instance = $TaskType::new()
+    $instance._publicKey = $this._publicKey
+    $instance._privateKey = $this._privateKey
+
     $response = [RequestHelper]::ConnectTask($this._publicKey, $this._privateKey, $parent.TaskId, $instance.GetToolName())
 
     $instance.SetServerTaskId($parent.ServerUrl, $response.TaskId)
