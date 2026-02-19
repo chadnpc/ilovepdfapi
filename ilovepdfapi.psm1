@@ -44,6 +44,387 @@ enum DocumentPageSizes {
 
 #endregion Enums
 
+#region Exceptions
+class DownloadException : System.Exception {
+  DownloadException() : base() {}
+  DownloadException([string]$message) : base($message) {}
+  DownloadException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class NotFoundException : System.Exception {
+  NotFoundException() : base() {}
+  NotFoundException([string]$message) : base($message) {}
+  NotFoundException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class ProcessingException : System.Exception {
+  ProcessingException() : base() {}
+  ProcessingException([string]$message) : base($message) {}
+  ProcessingException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class ServerErrorException : System.Exception {
+  ServerErrorException() : base() {}
+  ServerErrorException([string]$message) : base($message) {}
+  ServerErrorException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class SignatureException : System.Exception {
+  SignatureException() : base() {}
+  SignatureException([string]$message) : base($message) {}
+  SignatureException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class SignStartException : System.Exception {
+  SignStartException() : base() {}
+  SignStartException([string]$message) : base($message) {}
+  SignStartException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class TaskStartException : System.Exception {
+  TaskStartException() : base() {}
+  TaskStartException([string]$message) : base($message) {}
+  TaskStartException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class TooManyRequestsException : System.Exception {
+  TooManyRequestsException() : base() {}
+  TooManyRequestsException([string]$message) : base($message) {}
+  TooManyRequestsException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class UndefinedException : System.Exception {
+  UndefinedException() : base() {}
+  UndefinedException([string]$message) : base($message) {}
+  UndefinedException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class UploadException : System.Exception {
+  UploadException() : base() {}
+  UploadException([string]$message) : base($message) {}
+  UploadException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+#endregion Exceptions
+
+#region Additional Enums
+enum LovePdfErrors {
+  UploadError
+  ProcessingError
+  DownloadError
+  StartError
+  SignatureError
+}
+
+enum ConformanceValues {
+  PdfA1B
+  PdfA1A
+  PdfA2B
+  PdfA2U
+  PdfA2A
+  PdfA3B
+  PdfA3U
+  PdfA3A
+}
+
+enum ElementTypes {
+  Bottom
+  Text
+  Image
+  SVG
+}
+
+enum FontFamilies {
+  Arial
+  Courier
+  TimesNewRoman
+  Verdana
+  ComicSansMs
+  WenQuanYiZenHei
+  ArialUnicodeMs
+  LohitMarathi
+  LohitDevanagari
+}
+
+enum FontStyles {
+  Bold
+  Italic
+}
+
+enum ForceSignatureType {
+  All
+  Text
+  Sign
+  Image
+}
+
+enum Gravity {
+  NorthWest
+  North
+  NorthEast
+  West
+  Center
+  East
+  SouthWest
+  South
+  SouthEast
+}
+
+enum HorizontalPositions {
+  Left
+  Middle
+  Right
+}
+
+enum Languages {
+  Arabic
+  Bulgarian
+  Catalan
+  German
+  Greek
+  English
+  Spanish
+  French
+  Hindi
+  Indonesian
+  Italian
+  Japanese
+  Korean
+  Malaysian
+  Dutch
+  Polish
+  Portuguese
+  Russian
+  Swedish
+  Thai
+  Turkish
+  Ukrainian
+  Vietnamese
+  SimplifiedChinese
+  TraditionalChinese
+  Chinese
+  TaiwanChinese
+}
+
+enum Layer {
+  Above
+  Below
+}
+
+enum OCRLanguage {
+  Eng
+  Afr
+  Amh
+  Ara
+  Asm
+  Aze
+  Aze_Cyrl
+  Bel
+  Ben
+  Bod
+  Bos
+  Bre
+  Bul
+  Cat
+  Ceb
+  Ces
+  Chi_Sim
+  Chi_Tra
+  Chr
+  Cos
+  Cym
+  Dan
+  Dan_Frak
+  Deu
+  Deu_Frak
+  Dzo
+  Ell
+  Enm
+  Epo
+  Equ
+  Est
+  Eus
+  Fao
+  Fas
+  Fil
+  Fin
+  Fra
+  Frk
+  Frm
+  Fry
+  Gla
+  Gle
+  Glg
+  Grc
+  Guj
+  Hat
+  Heb
+  Hin
+  Hrv
+  Hun
+  Hye
+  Iku
+  Ind
+  Isl
+  Ita
+  Ita_Old
+  Jav
+  Jpn
+  Kan
+  Kat
+  Kat_Old
+  Kaz
+  Khm
+  Kir
+  Kmr
+  Kor
+  Kor_Vert
+  Kur
+  Lao
+  Lat
+  Lav
+  Lit
+  Ltz
+  Mal
+  Mar
+  Mkd
+  Mlt
+  Mon
+  Mri
+  Msa
+  Mya
+  Nep
+  Nld
+  Nor
+  Oci
+  Ori
+  Pan
+  Pol
+  Por
+  Pus
+  Que
+  Ron
+  Rus
+  San
+  Sin
+  Slk
+  Slk_Frak
+  Slv
+  Snd
+  Spa
+  Spa_Old
+  Squ
+  Srp
+  Srp_Latn
+  Sun
+  Swa
+  Swe
+  Syr
+  Tam
+  Tat
+  Tel
+  Tgk
+  Tgl
+  Tha
+  Tir
+  Ton
+  Tur
+  Uig
+  Ukr
+  Urd
+  Uzb
+  Uzb_Cyrl
+  Vie
+  Yid
+  Yor
+}
+
+enum Orientations {
+  Portrait
+  Landscape
+}
+
+enum PageSizes {
+  Fit
+  A4
+  Letter
+}
+
+enum PdfToJpgModes {
+  Pages
+  Extract
+}
+
+enum Rotate {
+  Degrees0
+  Degrees90
+  Degrees180
+  Degrees270
+}
+
+enum SignElementTypes {
+  Initials
+  Signature
+  Name
+  Date
+  Text
+  Input
+}
+
+enum SignSignerType {
+  Signer
+  Validator
+  Viewer
+}
+
+enum SplitModes {
+  Ranges
+  FixedRange
+  RemovePages
+}
+
+enum TextAligments {
+  Left
+  Center
+  Right
+}
+
+enum TextFontStyles {
+  Regular
+  Bold
+  Italic
+  BoldItalic
+}
+
+enum ValidationStatus {
+  Conformant
+  NonConformant
+}
+
+enum VerticalPositions {
+  Bottom
+  Top
+}
+
+enum WaterMarkHorizontalPositions {
+  Left
+  Middle
+  Right
+}
+
+enum WaterMarkModes {
+  Text
+  Image
+  Multi
+}
+
+enum WaterMarkVerticalPositions {
+  Bottom
+  Top
+  Center
+}
+
+#endregion Additional Enums
+
 #region Models and Parameters
 
 class BaseParams {
@@ -61,6 +442,200 @@ class OfficeToPdfParams : BaseParams { }
 class RotateParams : BaseParams { }
 class RepairParams : BaseParams { }
 class UnlockParams : BaseParams { }
+
+class Dimension {
+  [int]$Width
+  [int]$Height
+}
+
+class Coordinate {
+  [int]$X
+  [int]$Y
+}
+
+class Position {
+  [string]$X
+  [string]$Y
+}
+
+class BaseExtraUploadParams {
+  [Dictionary[string, string]]$ExtraParams
+  BaseExtraUploadParams() {
+    $this.ExtraParams = [Dictionary[string, string]]::new()
+  }
+}
+
+class EditElement {
+  [ElementTypes]$Type = [ElementTypes]::Bottom
+  [int]$Pages = 1
+  [int]$ZIndex = 1
+  [string]$Gravity = "Center"
+  [Dimension]$Dimensions
+  [Coordinate]$Coordinates
+  [int]$Rotation
+  [int]$Opacity = 100
+}
+
+class BaseSignElement {
+  [SignElementTypes]$Type
+  [string]$Pages
+  [Position]$Position
+  [int]$Size = 18
+  [int]$HorizontalAdjustment = 0
+  [int]$VerticalAdjustment = 0
+}
+
+class BaseSignSigner {
+  [SignSignerType]$Type
+  [string]$Name
+  [string]$Email
+  [string]$AccessCode
+}
+
+class SignerFile {
+  [string]$File
+  [List[object]]$Elements
+  SignerFile() {
+    # Using [object] to avoid circular type reference before BaseSignElement is defined?
+    # Actually in PS it should be fine.
+    $this.Elements = [List[object]]::new()
+  }
+}
+
+class ImageElement : EditElement {
+  [string]$ServerFileName
+}
+
+class SvgElement : EditElement {
+  [string]$ServerFileName
+}
+
+class TextElementEdit : EditElement {
+  [string]$Text
+  [TextAligments]$Align
+  [FontFamilies]$FontFamily
+  [TextFontStyles]$FontStyle
+  [bool]$UnderlineText
+}
+
+class DateElement : BaseSignElement {
+}
+
+class InitialsElement : BaseSignElement {
+}
+
+class InputElement : BaseSignElement {
+}
+
+class NameElement : BaseSignElement {
+}
+
+class SignatureElement : BaseSignElement {
+}
+
+class TextElementSign : BaseSignElement {
+  [string]$Text
+}
+
+class Signer : BaseSignSigner {
+  [string]$Phone
+  [List[SignerFile]]$Files
+  Signer() {
+    $this.Files = [List[SignerFile]]::new()
+  }
+}
+
+class Validator : BaseSignSigner {
+}
+
+class Viewer : BaseSignSigner {
+}
+
+class EditParams : BaseParams {
+}
+
+class ExtractParams : BaseParams {
+  [bool]$Detailed
+  [bool]$ByWord
+}
+
+class HTMLtoPDFParams : BaseParams {
+  [int]$ViewWidth
+  [int]$Margin
+  [bool]$RemovePopups
+  [bool]$SinglePage
+}
+
+class ImageToPdfParams : BaseParams {
+  [Orientations]$Orientation
+  [int]$Margin
+  [PageSizes]$PageSize
+  [bool]$MergeAfter
+}
+
+class MergeParams : BaseParams {
+}
+
+class PageNumbersParams : BaseParams {
+  [bool]$FacingPages
+  [bool]$FirstCover
+  [string]$Pages
+  [int]$StartingNumber
+  [VerticalPositions]$VerticalPosition
+  [HorizontalPositions]$HorizontalPosition
+  [int]$VerticalPositionAdjustment
+  [int]$HorizontalPositionAdjustment
+  [FontFamilies]$FontFamily
+  [int]$FontSize
+  [string]$FontColor
+  [string]$Text
+}
+
+class PDFOCRParams : BaseParams {
+  [List[OCRLanguage]]$OCRLanguages = [List[OCRLanguage]]::new()
+}
+
+class PdftoJpgParams : BaseParams {
+  [PdfToJpgModes]$PdfJpgMode
+}
+
+class PdfToPdfAParams : BaseParams {
+  [ConformanceValues]$Conformance
+}
+
+class ProtectParams : BaseParams {
+  [string]$Password
+}
+
+class SignExtraUploadParams : BaseExtraUploadParams {
+}
+
+class SplitParams : BaseParams {
+  [SplitModes]$SplitMode
+  [string]$Ranges
+  [int]$FixedRanges
+  [string]$RemovePages
+  [bool]$MergeAfter
+}
+
+class ValidatePdfAParams : BaseParams {
+  [ConformanceValues]$Conformance
+}
+
+class WaterMarkParams : BaseParams {
+  [WaterMarkModes]$Mode
+  [string]$Text
+  [string]$Image
+  [string]$Pages
+  [int]$VerticalPositionAdjustment
+  [int]$HorizontalPositionAdjustment
+  [bool]$Mosaic
+  [int]$Rotation
+  [string]$FontFamily
+  [int]$FontSize
+  [string]$FontColor
+  [int]$Transparency
+}
 
 class CompressParams : BaseParams {
   [CompressionLevels]$CompressionLevel = [CompressionLevels]::Recommended
