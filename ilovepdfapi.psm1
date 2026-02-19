@@ -72,6 +72,12 @@ class StartTaskResponse {
   [string]$TaskId
 }
 
+class ConnectTaskResponse {
+  [string]$Server
+  [string]$TaskId
+  [Dictionary[string, string]]$Files
+}
+
 class StatusTaskFileResponse {
   [string]$ServerFilename
   [string]$Status
@@ -162,6 +168,155 @@ class iLovePdfTask {
 
 #endregion Core Tasks
 
+#region HTTP Helpers
+
+class RequestHelper {
+  static [string] GetJwt([string]$publicKey, [string]$privateKey) {
+    $header = @{
+      alg = "HS256"
+      typ = "JWT"
+    } | ConvertTo-Json -Compress
+
+    $payload = @{
+      jti = $publicKey
+      iss = ""
+      aud = ""
+      iat = [Math]::Floor([datetimeoffset]::UtcNow.AddHours(-1).ToUnixTimeSeconds())
+      nbf = [Math]::Floor([datetimeoffset]::UtcNow.AddHours(-1).ToUnixTimeSeconds())
+      exp = [Math]::Floor([datetimeoffset]::UtcNow.AddHours(2).ToUnixTimeSeconds())
+    } | ConvertTo-Json -Compress
+
+    $base64UrlHeader = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($header)).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+    $base64UrlPayload = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($payload)).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+
+    $hmac = [System.Security.Cryptography.HMACSHA256]::new([Text.Encoding]::UTF8.GetBytes($privateKey))
+    $signature = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes("$base64UrlHeader.$base64UrlPayload"))
+    $base64UrlSignature = [Convert]::ToBase64String($signature).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+
+    return "$base64UrlHeader.$base64UrlPayload.$base64UrlSignature"
+  }
+
+  static [StartTaskResponse] StartTask([string]$publicKey, [string]$privateKey, [string]$tool) {
+    $jwt = [RequestHelper]::GetJwt($publicKey, $privateKey)
+    $headers = @{ Authorization = "Bearer $jwt" }
+    $url = "https://api.ilovepdf.com/v1/start/$tool"
+
+    $response = Invoke-RestMethod -Uri $url -Method Get -Headers $headers
+
+    $res = [StartTaskResponse]::new()
+    $res.Server = $response.server
+    $res.TaskId = $response.task
+    return $res
+  }
+
+  static [ConnectTaskResponse] ConnectTask([string]$publicKey, [string]$privateKey, [string]$parentTaskId, [string]$tool) {
+    $jwt = [RequestHelper]::GetJwt($publicKey, $privateKey)
+    $headers = @{ Authorization = "Bearer $jwt" }
+    $url = "https://api.ilovepdf.com/v1/task/next"
+
+    $form = @{
+      task = $parentTaskId
+      tool = $tool
+    }
+
+    $response = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Form $form
+
+    $res = [ConnectTaskResponse]::new()
+    $res.Server = $response.server
+    $res.TaskId = $response.task
+    $res.Files = [System.Collections.Generic.Dictionary[string, string]]::new()
+    if ($null -ne $response.files) {
+      $props = $response.files.psobject.properties
+      if ($null -ne $props) {
+        foreach ($prop in $props) {
+          $res.Files.Add($prop.Name, $prop.Value.ToString())
+        }
+      }
+    }
+    return $res
+  }
+
+  static [UploadTaskResponse] UploadFile([string]$publicKey, [string]$privateKey, [Uri]$serverUrl, [string]$taskId, [string]$filePath) {
+    $jwt = [RequestHelper]::GetJwt($publicKey, $privateKey)
+    $headers = @{ Authorization = "Bearer $jwt" }
+    $url = "$($serverUrl.AbsoluteUri)v1/upload"
+
+    $form = @{
+      task = $taskId
+      file = Get-Item -Path $filePath
+    }
+
+    $response = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Form $form
+
+    $res = [UploadTaskResponse]::new()
+    $res.ServerFileName = $response.server_filename
+    return $res
+  }
+
+  static [ExecuteTaskResponse] ExecuteTask([string]$publicKey, [string]$privateKey, [Uri]$serverUrl, [string]$taskId, [List[FileModel]]$files, [string]$tool, [BaseParams]$parameters) {
+    $jwt = [RequestHelper]::GetJwt($publicKey, $privateKey)
+    $headers = @{ Authorization = "Bearer $jwt" }
+    $url = "$($serverUrl.AbsoluteUri)v1/process"
+
+    # Build form data
+    $form = @{
+      task = $taskId
+      tool = $tool
+      v    = "net.pwsh"
+    }
+
+    # Add files array properly
+    for ($i = 0; $i -lt $files.Count; $i++) {
+      $form.Add("files[$i][filename]", $files[$i].FileName)
+      $form.Add("files[$i][server_filename]", $files[$i].ServerFileName)
+      $form.Add("files[$i][password]", $files[$i].Password)
+    }
+
+    # Add parameter properties
+    if ($parameters) {
+      $props = $parameters.psobject.properties | Where-Object { $null -ne $_.Value }
+      foreach ($prop in $props) {
+        # Map PascalCase to snake_case minimally if needed, or rely on them matching API expected cases.
+        # In C# there are [JsonProperty("property_name")] bindings.
+        # We'll just pass them. For complete support a JSON/Hashtable property mapper is needed.
+        $form.Add($prop.Name.ToLower(), $prop.Value.ToString())
+      }
+    }
+
+    $response = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Form $form
+
+    $res = [ExecuteTaskResponse]::new()
+    $res.FileSize = $response.filesize
+    $res.OutputFileSize = $response.output_filesize
+    $res.Timer = $response.timer
+    return $res
+  }
+
+  static [StatusTaskResponse] CheckTaskStatus([string]$publicKey, [string]$privateKey, [Uri]$serverUrl, [string]$taskId) {
+    $jwt = [RequestHelper]::GetJwt($publicKey, $privateKey)
+    $headers = @{ Authorization = "Bearer $jwt" }
+    $url = "$($serverUrl.AbsoluteUri)v1/task/$taskId"
+
+    $response = Invoke-RestMethod -Uri $url -Method Get -Headers $headers
+
+    $res = [StatusTaskResponse]::new()
+    $res.Status = $response.status
+    $res.StatusMessage = $response.status_message
+    $res.Timer = $response.timer
+    return $res
+  }
+
+  static [void] Download([string]$publicKey, [string]$privateKey, [Uri]$serverUrl, [string]$taskId, [string]$destinationPath) {
+    $jwt = [RequestHelper]::GetJwt($publicKey, $privateKey)
+    $headers = @{ Authorization = "Bearer $jwt" }
+    $url = "$($serverUrl.AbsoluteUri)v1/download/$taskId"
+
+    Invoke-WebRequest -Uri $url -Method Get -Headers $headers -OutFile $destinationPath
+  }
+}
+
+#endregion HTTP Helpers
+
 #region Classes
 
 # Main class
@@ -180,20 +335,30 @@ class ilovepdfapi {
     $this._privateKey = $privateKey
   }
 
-  static [iLovePdfTask] CreateTask([type]$TaskType, [string]$publicKey, [string]$privateKey) {
-    $api = [ilovepdfapi]::new($publicKey, $privateKey)
-    $instance = $TaskType::new()
+  [iLovePdfTask] CreateTask([type]$TaskType) {
+    if (-not $TaskType.IsSubclassOf([iLovePdfTask])) {
+      throw "TaskType must inherit from iLovePdfTask"
+    }
 
-    # In a full implementation, you'd call [RequestHelper]::StartTask(...) here
-    # to get StartTaskResponse. For now we just return the instantiated task.
+    $instance = $TaskType::new()
+    $response = [RequestHelper]::StartTask($this._publicKey, $this._privateKey, $instance.GetToolName())
+
+    $serverUrl = "https://$($response.Server)/"
+    $instance.SetServerTaskId([Uri]::new($serverUrl), $response.TaskId)
 
     return $instance
   }
 
-  static [iLovePdfTask] ConnectTask([iLovePdfTask]$parent, [type]$TaskType) {
-    $instance = $TaskType::new()
+  [iLovePdfTask] ConnectTask([iLovePdfTask]$parent, [type]$TaskType) {
+    if (-not $TaskType.IsSubclassOf([iLovePdfTask])) {
+      throw "TaskType must inherit from iLovePdfTask"
+    }
 
-    # Here we'd call [RequestHelper]::ConnectTask(...)
+    $instance = $TaskType::new()
+    $response = [RequestHelper]::ConnectTask($this._publicKey, $this._privateKey, $parent.TaskId, $instance.GetToolName())
+
+    $instance.SetServerTaskId($parent.ServerUrl, $response.TaskId)
+    $instance.AddFiles($response.Files)
 
     return $instance
   }
@@ -203,7 +368,7 @@ class ilovepdfapi {
 
 # Types that will be available to users when they import the module.
 $typestoExport = @(
-  [ilovepdfapi]
+  [ilovepdfapi], [RequestHelper], [CompressParams]
 )
 
 $TypeAcceleratorsClass = [PsObject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
