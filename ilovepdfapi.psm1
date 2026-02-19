@@ -184,7 +184,7 @@ class ilovepdfapi {
     $api = [ilovepdfapi]::new($publicKey, $privateKey)
     $instance = $TaskType::new()
 
-    # In a full implementation, you'd call RequestHelper.StartTask here
+    # In a full implementation, you'd call [RequestHelper]::StartTask(...) here
     # to get StartTaskResponse. For now we just return the instantiated task.
 
     return $instance
@@ -193,7 +193,7 @@ class ilovepdfapi {
   static [iLovePdfTask] ConnectTask([iLovePdfTask]$parent, [type]$TaskType) {
     $instance = $TaskType::new()
 
-    # Here we'd call RequestHelper.ConnectTask
+    # Here we'd call [RequestHelper]::ConnectTask(...)
 
     return $instance
   }
