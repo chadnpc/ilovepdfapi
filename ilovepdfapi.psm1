@@ -641,6 +641,136 @@ class CompressParams : BaseParams {
   [CompressionLevels]$CompressionLevel = [CompressionLevels]::Recommended
 }
 
+class WatermarkModeText {
+  [string]$Text
+  WatermarkModeText([string]$text) {
+    $this.Text = $text
+  }
+}
+
+class WatermarkModeImage {
+  [string]$ServerFileName
+  WatermarkModeImage([string]$serverFileName) {
+    $this.ServerFileName = $serverFileName
+  }
+}
+
+class WaterMarkParamsElement {
+  [WaterMarkModes]$Mode
+  [string]$Text
+  [string]$Image
+  [string]$Pages = "all"
+  [WaterMarkVerticalPositions]$VerticalPosition
+  [WaterMarkHorizontalPositions]$HorizontalPosition
+  [int]$VerticalPositionAdjustment = 0
+  [int]$HorizontalPositionAdjustment = 0
+  [bool]$Mosaic = $false
+  [int]$Rotation = 0
+  [string]$FontFamily = "Arial Unicode MS"
+  [FontStyles]$FontStyle
+  [int]$FontSize = 14
+  [string]$FontColor = "#000000"
+  [int]$Transparency = 100
+  [int]$Zoom
+  [int]$Border
+  [Gravity]$Gravity = [Gravity]::Center
+  [Layer]$Layer
+
+  WaterMarkParamsElement([WatermarkModeText]$mode) {
+    if ($null -eq $mode) {
+      throw [System.ArgumentException]::new("mode cannot be null", "mode")
+    }
+    $this.Mode = [WaterMarkModes]::Text
+    $this.Text = $mode.Text
+  }
+
+  WaterMarkParamsElement([WatermarkModeImage]$mode) {
+    if ($null -eq $mode) {
+      throw [System.ArgumentException]::new("mode cannot be null", "mode")
+    }
+    $this.Mode = [WaterMarkModes]::Image
+    $this.Image = $mode.ServerFileName
+  }
+}
+
+class SplitModeFixedRanges {
+  [int]$FixedRange
+  SplitModeFixedRanges([int]$ranges) {
+    $this.FixedRange = $ranges
+  }
+}
+
+class SplitModeRanges {
+  [string]$Ranges
+  SplitModeRanges([string]$ranges) {
+    $this.Ranges = $ranges
+  }
+}
+
+class SplitModeRemovePages {
+  [string]$RemovePages
+  SplitModeRemovePages([string]$removePages) {
+    $this.RemovePages = $removePages
+  }
+}
+
+class ListRequest {
+  [int]$Page = 0
+  [int]$PerPage = 20
+
+  ListRequest() {}
+
+  ListRequest([int]$page, [int]$perPage) {
+    $this.Page = $page
+    $this.PerPage = $perPage
+  }
+
+  [void] SetPerPage([int]$value) {
+    if ($value -lt 1 -or $value -gt 100) {
+      throw [System.ArgumentOutOfRangeException]::new("PerPage", "PerPage must be between 1 and 100 pages")
+    }
+    $this.PerPage = $value
+  }
+}
+
+class SignParams : BaseParams {
+  [string]$BrandName
+  [string]$BrandLogo
+  [Languages]$Language = [Languages]::English
+  [bool]$LockOrder = $false
+  [bool]$SignerReminders = $true
+  [int]$SignerReminderDaysCycle = 1
+  [bool]$VerifyEnabled = $true
+  [bool]$UuidVisible = $true
+  [int]$ExpirationDays = 120
+  [string]$MessageSigner
+  [string]$SubjectSigner
+  [List[object]]$Signers
+
+  SignParams() {
+    $this.Signers = [List[object]]::new()
+  }
+
+  SignParams([List[object]]$signers) {
+    $this.Signers = if ($null -ne $signers) { $signers } else { [List[object]]::new() }
+  }
+
+  [void] SetBrand([string]$name, [string]$serverFileName) {
+    if ([string]::IsNullOrEmpty($name) -or [string]::IsNullOrEmpty($serverFileName)) {
+      throw [System.ArgumentNullException]::new("name", "Parameters are mandatory.")
+    }
+    $this.BrandName = $name
+    $this.BrandLogo = $serverFileName
+  }
+
+  [void] SetExpirationDays([int]$days) {
+    if ($days -lt 1 -or $days -gt 130) {
+      throw [System.ArgumentOutOfRangeException]::new("ExpirationDays", "Value must be between 1 and 130")
+    }
+    $this.ExpirationDays = $days
+  }
+}
+
 # Responses
 class StartTaskResponse {
   [string]$Server
@@ -772,6 +902,321 @@ class CompressTask : iLovePdfTask {
   [ExecuteTaskResponse] Process([CompressParams]$parameters) {
     if ($null -eq $parameters) {
       $parameters = [CompressParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class MergeTask : iLovePdfTask {
+  MergeTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Merge.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [MergeParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([MergeParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [MergeParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class SplitTask : iLovePdfTask {
+  SplitTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Split.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process([SplitParams]$parameters) {
+    if ($null -eq $parameters) {
+      throw [System.ArgumentException]::new("Parameters should not be null", "parameters")
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class OfficeToPdfTask : iLovePdfTask {
+  OfficeToPdfTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::OfficeToPdf.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [OfficeToPdfParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([OfficeToPdfParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [OfficeToPdfParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class PdfToJpgTask : iLovePdfTask {
+  PdfToJpgTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::PdfToJpg.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [PdftoJpgParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([PdftoJpgParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [PdftoJpgParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class ImageToPdfTask : iLovePdfTask {
+  ImageToPdfTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::ImagePdf.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [ImageToPdfParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([ImageToPdfParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [ImageToPdfParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class WaterMarkTask : iLovePdfTask {
+  WaterMarkTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::WaterMark.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process([WaterMarkParams]$parameters) {
+    if ($null -eq $parameters) {
+      throw [System.ArgumentException]::new("Parameters should not be null", "parameters")
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class PageNumbersTask : iLovePdfTask {
+  PageNumbersTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::PageNumber.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process([PageNumbersParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [PageNumbersParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class UnlockTask : iLovePdfTask {
+  UnlockTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Unlock.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [UnlockParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([UnlockParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [UnlockParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class RotateTask : iLovePdfTask {
+  RotateTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Rotate.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [RotateParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([RotateParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [RotateParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class RepairTask : iLovePdfTask {
+  RepairTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Repair.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [RepairParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([RepairParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [RepairParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class ProtectTask : iLovePdfTask {
+  ProtectTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Protect.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process([ProtectParams]$parameters) {
+    if ($null -eq $parameters) {
+      throw [System.ArgumentException]::new("Parameters should not be null", "parameters")
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class ValidatePdfATask : iLovePdfTask {
+  ValidatePdfATask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::ValidatePdfA.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [ValidatePdfAParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([ValidatePdfAParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [ValidatePdfAParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class PdfToPdfATask : iLovePdfTask {
+  PdfToPdfATask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::PdfToPdfA.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [PdfToPdfAParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([PdfToPdfAParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [PdfToPdfAParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class ExtractTask : iLovePdfTask {
+  ExtractTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Extract.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [ExtractParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([ExtractParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [ExtractParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class HtmlToPdfTask : iLovePdfTask {
+  HtmlToPdfTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::HtmlToPdf.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process([HTMLtoPDFParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [HTMLtoPDFParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class PdfocrTask : iLovePdfTask {
+  PdfocrTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Pdfocr.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process() {
+    $parameters = [PDFOCRParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([PDFOCRParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [PDFOCRParams]::new()
+    }
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+}
+
+class EditTask : iLovePdfTask {
+  EditTask() {}
+
+  [string] GetToolName() {
+    return [TaskName]::Edit.ToString().ToLower()
+  }
+
+  [ExecuteTaskResponse] Process([List[object]]$elements) {
+    $parameters = [EditParams]::new()
+    return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
+  }
+
+  [ExecuteTaskResponse] Process([EditParams]$parameters) {
+    if ($null -eq $parameters) {
+      $parameters = [EditParams]::new()
     }
     return ([iLovePdfTask]$this).Process([BaseParams]$parameters)
   }
@@ -985,7 +1430,22 @@ class ilovepdfapi {
 
 # Types that will be available to users when they import the module.
 $typestoExport = @(
-  [ilovepdfapi], [RequestHelper], [CompressParams]
+  # Core classes
+  [ilovepdfapi], [RequestHelper],
+  # TaskParams
+  [BaseParams], [CompressParams], [MergeParams], [SplitParams], [OfficeToPdfParams],
+  [PdftoJpgParams], [ImageToPdfParams], [WaterMarkParams], [PageNumbersParams],
+  [UnlockParams], [RotateParams], [RepairParams], [ProtectParams],
+  [ValidatePdfAParams], [PdfToPdfAParams], [ExtractParams], [HTMLtoPDFParams],
+  [PDFOCRParams], [EditParams], [SignParams], [ListRequest],
+  [WatermarkModeText], [WatermarkModeImage], [WaterMarkParamsElement],
+  [SplitModeFixedRanges], [SplitModeRanges], [SplitModeRemovePages],
+  # Tasks
+  [iLovePdfTask], [CompressTask], [MergeTask], [SplitTask], [OfficeToPdfTask],
+  [PdfToJpgTask], [ImageToPdfTask], [WaterMarkTask], [PageNumbersTask],
+  [UnlockTask], [RotateTask], [RepairTask], [ProtectTask],
+  [ValidatePdfATask], [PdfToPdfATask], [ExtractTask], [HtmlToPdfTask],
+  [PdfocrTask], [EditTask]
 )
 
 $TypeAcceleratorsClass = [PsObject].Assembly.GetType('System.Management.Automation.TypeAccelerators')
