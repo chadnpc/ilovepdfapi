@@ -1,22 +1,64 @@
-﻿
 # [ilovepdfapi](https://www.powershellgallery.com/packages/ilovepdfapi)
 
-🔥 Blazingly fast PowerShell thingy that stonks up your terminal game.
+PowerShell module for iLovePDF API - manipulate PDFs with ease.
 
 [![Build Module](https://github.com/chadnpc/ilovepdfapi/actions/workflows/build_module.yaml/badge.svg)](https://github.com/chadnpc/ilovepdfapi/actions/workflows/build_module.yaml)
 [![Downloads](https://img.shields.io/powershellgallery/dt/ilovepdfapi.svg?style=flat&logo=powershell&color=blue)](https://www.powershellgallery.com/packages/ilovepdfapi)
 
-## Usage
+## Installation
 
 ```PowerShell
 Install-Module ilovepdfapi
 ```
 
-then
+## Usage
 
 ```PowerShell
 Import-Module ilovepdfapi
-# do stuff here.
+```
+
+### Initialize with your API keys
+
+```PowerShell
+$publicKey = "your_public_key"
+$privateKey = "your_private_key"
+```
+
+### Available Functions
+
+| Function | Description |
+|----------|-------------|
+| `Compress-Pdf` | Compress PDF files |
+| `Merge-Pdf` | Merge multiple PDF files |
+| `Split-Pdf` | Split PDF files |
+| `ConvertFrom-OfficeToPdf` | Convert Office documents to PDF |
+| `ConvertTo-PdfToJpg` | Convert PDF to JPG images |
+| `ConvertTo-ImageToPdf` | Convert images to PDF |
+| `Add-WaterMark` | Add watermark to PDF |
+| `Add-PageNumbers` | Add page numbers to PDF |
+| `Unlock-Pdf` | Unlock protected PDF |
+| `Rotate-Pdf` | Rotate PDF pages |
+| `Repair-Pdf` | Repair damaged PDF |
+| `Protect-Pdf` | Protect PDF with password |
+| `Test-PdfA` | Validate PDF/A compliance |
+| `ConvertTo-PdfA` | Convert to PDF/A format |
+| `Extract-PdfContent` | Extract content from PDF |
+| `ConvertTo-PdfFromHtml` | Convert HTML to PDF |
+| `Invoke-PdfOcr` | Perform OCR on PDF |
+| `Edit-Pdf` | Edit PDF files |
+
+### Example: Compress a PDF
+
+```PowerShell
+$result = Compress-Pdf -FilePaths @("document.pdf") `
+    -PublicKey $publicKey `
+    -PrivateKey $privateKey `
+    -OutputFolder "." `
+    -CompressionLevel "Recommended"
+
+Write-Host "Original: $($result.OriginalFilesize) bytes"
+Write-Host "Compressed: $($result.OutputFilesize) bytes"
+Write-Host "Saved to: $($result.SavedPath)"
 ```
 
 ## License
