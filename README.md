@@ -19,8 +19,9 @@ Import-Module ilovepdfapi
 ### Initialize with your API keys
 
 ```PowerShell
-$publicKey = "your_public_key"
-$privateKey = "your_private_key"
+# see .env.example
+$publicKey =  (Get-Env -Name ILOVEAPI_PUBLIC_KEY -Path .env).Value
+$privateKey =  (Get-Env -Name ILOVEAPI_PRIVATE_KEY -Path .env).Value
 ```
 
 ### Available Functions
