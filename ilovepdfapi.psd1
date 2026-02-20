@@ -51,7 +51,9 @@
   ProcessorArchitecture = 'None'
 
   # Modules that must be imported into the global environment prior to importing this module
-  RequiredModules       = @()
+  RequiredModules       = @(
+    'cliHelper.env'
+  )
 
   # Assemblies that must be loaded prior to importing this module
   # RequiredAssemblies = @()
@@ -122,9 +124,7 @@
 
       # External dependent modules of this module
       # ExternalModuleDependencies = @()
-
     } # End of PSData hashtable
-
   } # End of PrivateData hashtable
 
   # HelpInfo URI of this module
@@ -132,5 +132,4 @@
 
   # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
   # DefaultCommandPrefix = ''
-
 }
