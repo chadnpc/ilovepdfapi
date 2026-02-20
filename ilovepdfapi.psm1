@@ -847,13 +847,13 @@ class iLovePdfTask {
   [string]$_privateKey
   [Uri]$ServerUrl
   [string]$TaskId
-  hidden [List[FileModel]]$Files
+  [List[FileModel]]$Files
 
   iLovePdfTask() {
     $this.Files = [List[FileModel]]::new()
   }
 
-  hidden [string] GetToolName() {
+  [string] GetToolName() {
     return ""
   }
 
