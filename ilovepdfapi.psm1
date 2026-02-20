@@ -1377,8 +1377,8 @@ class RequestHelper {
 
 # Main class
 class ilovepdfapi {
-  hidden [string]$_publicKey
-  hidden [string]$_privateKey
+  [string]$_publicKey
+  [string]$_privateKey
 
   ilovepdfapi([string]$publicKey, [string]$privateKey) {
     if ([string]::IsNullOrWhiteSpace($publicKey)) {
