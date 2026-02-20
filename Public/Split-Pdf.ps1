@@ -66,7 +66,7 @@ function Split-Pdf {
 
     Write-Verbose "Downloading split files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder "split_output.zip"
+    $downloadDest = [IO.Path]::Combine($OutputFolder, "split_output.zip")
 
     $task.DownloadFile($downloadDest)
 

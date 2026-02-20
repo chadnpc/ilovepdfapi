@@ -48,9 +48,10 @@ function Compress-Pdf {
     if ($FilePaths.Count -eq 1) {
       $name = [System.IO.Path]::GetFileNameWithoutExtension($FilePaths[0])
       $ext = [System.IO.Path]::GetExtension($FilePaths[0])
-      $downloadDest = Join-Path $OutputFolder "${name}_compressed$ext"
-    } else {
-      $downloadDest = Join-Path $OutputFolder "compressed_output.zip"
+      $downloadDest = [IO.Path]::Combine($OutputFolder, "${name}_compressed$ext")
+    }
+    else {
+      $downloadDest = [IO.Path]::Combine($OutputFolder, "compressed_output.zip")
     }
 
     $task.DownloadFile($downloadDest)

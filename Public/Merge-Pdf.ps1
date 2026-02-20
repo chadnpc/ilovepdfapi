@@ -39,7 +39,7 @@ function Merge-Pdf {
 
     Write-Verbose "Downloading merged files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder $OutputFileName
+    $downloadDest = [IO.Path]::Combine($OutputFolder, $OutputFileName)
 
     $task.DownloadFile($downloadDest)
 

@@ -45,7 +45,7 @@ function ConvertTo-PdfA {
 
     Write-Verbose "Downloading converted files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder $OutputFileName
+    $downloadDest = [IO.Path]::Combine($OutputFolder, $OutputFileName)
 
     $task.DownloadFile($downloadDest)
 

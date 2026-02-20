@@ -41,7 +41,7 @@ function Edit-Pdf {
 
     Write-Verbose "Downloading edited files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder $OutputFileName
+    $downloadDest = [IO.Path]::Combine($OutputFolder, $OutputFileName)
 
     $task.DownloadFile($downloadDest)
 

@@ -39,7 +39,7 @@ function Unlock-Pdf {
 
     Write-Verbose "Downloading unlocked files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder $OutputFileName
+    $downloadDest = [IO.Path]::Combine($OutputFolder, $OutputFileName)
 
     $task.DownloadFile($downloadDest)
 

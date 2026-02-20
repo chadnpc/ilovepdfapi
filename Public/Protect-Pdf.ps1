@@ -14,7 +14,7 @@ function Protect-Pdf {
     [string]$OutputFolder = ".",
 
     [Parameter(Mandatory)]
-    [string]$Password,
+    [SecureString]$Password,
 
     [Parameter()]
     [string]$OutputFileName = "protected.pdf"
@@ -38,14 +38,14 @@ function Protect-Pdf {
 
   end {
     $params = [ProtectParams]::new()
-    $params.Password = $Password
+    $params.Password = $Password | xconvert Tostring
 
     Write-Verbose "Processing protect task on iLovePDF server..."
     $executionRes = $task.Process($params)
 
     Write-Verbose "Downloading protected files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder $OutputFileName
+    $downloadDest = [IO.Path]::Combine($OutputFolder, $OutputFileName)
 
     $task.DownloadFile($downloadDest)
 

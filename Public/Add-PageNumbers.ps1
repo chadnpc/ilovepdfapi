@@ -86,7 +86,7 @@ function Add-PageNumbers {
 
     Write-Verbose "Downloading files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder "pagenumbers_output.pdf"
+    $downloadDest = [IO.Path]::Combine($OutputFolder, "pagenumbers_output.pdf")
 
     $task.DownloadFile($downloadDest)
 

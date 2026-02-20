@@ -46,7 +46,7 @@ function Extract-PdfContent {
 
     Write-Verbose "Downloading extracted files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder "extracted_output.zip"
+    $downloadDest = [IO.Path]::Combine($OutputFolder, "extracted_output.zip")
 
     $task.DownloadFile($downloadDest)
 

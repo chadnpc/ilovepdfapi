@@ -91,7 +91,7 @@ function Add-WaterMark {
 
     Write-Verbose "Downloading watermarked files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder "watermarked_output.pdf"
+    $downloadDest = [IO.Path]::Combine($OutputFolder, "watermarked_output.pdf")
 
     $task.DownloadFile($downloadDest)
 

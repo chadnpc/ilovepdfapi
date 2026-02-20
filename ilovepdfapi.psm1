@@ -42,71 +42,6 @@ enum DocumentPageSizes {
   Letter
 }
 
-#endregion Enums
-
-#region Exceptions
-class DownloadException : System.Exception {
-  DownloadException() : base() {}
-  DownloadException([string]$message) : base($message) {}
-  DownloadException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class NotFoundException : System.Exception {
-  NotFoundException() : base() {}
-  NotFoundException([string]$message) : base($message) {}
-  NotFoundException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class ProcessingException : System.Exception {
-  ProcessingException() : base() {}
-  ProcessingException([string]$message) : base($message) {}
-  ProcessingException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class ServerErrorException : System.Exception {
-  ServerErrorException() : base() {}
-  ServerErrorException([string]$message) : base($message) {}
-  ServerErrorException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class SignatureException : System.Exception {
-  SignatureException() : base() {}
-  SignatureException([string]$message) : base($message) {}
-  SignatureException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class SignStartException : System.Exception {
-  SignStartException() : base() {}
-  SignStartException([string]$message) : base($message) {}
-  SignStartException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class TaskStartException : System.Exception {
-  TaskStartException() : base() {}
-  TaskStartException([string]$message) : base($message) {}
-  TaskStartException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class TooManyRequestsException : System.Exception {
-  TooManyRequestsException() : base() {}
-  TooManyRequestsException([string]$message) : base($message) {}
-  TooManyRequestsException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class UndefinedException : System.Exception {
-  UndefinedException() : base() {}
-  UndefinedException([string]$message) : base($message) {}
-  UndefinedException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-
-class UploadException : System.Exception {
-  UploadException() : base() {}
-  UploadException([string]$message) : base($message) {}
-  UploadException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
-}
-#endregion Exceptions
-
-#region Additional Enums
 enum LovePdfErrors {
   UploadError
   ProcessingError
@@ -422,8 +357,69 @@ enum WaterMarkVerticalPositions {
   Top
   Center
 }
+#endregion Enums
 
-#endregion Additional Enums
+#region Exceptions
+class DownloadException : System.Exception {
+  DownloadException() : base() {}
+  DownloadException([string]$message) : base($message) {}
+  DownloadException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class NotFoundException : System.Exception {
+  NotFoundException() : base() {}
+  NotFoundException([string]$message) : base($message) {}
+  NotFoundException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class ProcessingException : System.Exception {
+  ProcessingException() : base() {}
+  ProcessingException([string]$message) : base($message) {}
+  ProcessingException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class ServerErrorException : System.Exception {
+  ServerErrorException() : base() {}
+  ServerErrorException([string]$message) : base($message) {}
+  ServerErrorException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class SignatureException : System.Exception {
+  SignatureException() : base() {}
+  SignatureException([string]$message) : base($message) {}
+  SignatureException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class SignStartException : System.Exception {
+  SignStartException() : base() {}
+  SignStartException([string]$message) : base($message) {}
+  SignStartException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class TaskStartException : System.Exception {
+  TaskStartException() : base() {}
+  TaskStartException([string]$message) : base($message) {}
+  TaskStartException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class TooManyRequestsException : System.Exception {
+  TooManyRequestsException() : base() {}
+  TooManyRequestsException([string]$message) : base($message) {}
+  TooManyRequestsException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class UndefinedException : System.Exception {
+  UndefinedException() : base() {}
+  UndefinedException([string]$message) : base($message) {}
+  UndefinedException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+
+class UploadException : System.Exception {
+  UploadException() : base() {}
+  UploadException([string]$message) : base($message) {}
+  UploadException([string]$message, [System.Exception]$innerException) : base($message, $innerException) {}
+}
+#endregion Exceptions
 
 #region Models and Parameters
 
@@ -1478,7 +1474,8 @@ foreach ($file in $scripts) {
   try {
     if ([string]::IsNullOrWhiteSpace($file.fullname)) { continue }
     . "$($file.fullname)"
-  } catch {
+  }
+  catch {
     Write-Warning "Failed to import function $($file.BaseName): $_"
     $host.UI.WriteErrorLine($_)
   }

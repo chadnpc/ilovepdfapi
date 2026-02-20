@@ -39,7 +39,7 @@ function Rotate-Pdf {
 
     Write-Verbose "Downloading rotated files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder $OutputFileName
+    $downloadDest = [IO.Path]::Combine($OutputFolder, $OutputFileName)
 
     $task.DownloadFile($downloadDest)
 

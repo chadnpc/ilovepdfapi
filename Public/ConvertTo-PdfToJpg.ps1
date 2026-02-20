@@ -42,7 +42,7 @@ function ConvertTo-PdfToJpg {
 
     Write-Verbose "Downloading converted files to $OutputFolder"
 
-    $downloadDest = Join-Path $OutputFolder "pdf_to_jpg_output.zip"
+    $downloadDest = [IO.Path]::Combine($OutputFolder, "pdf_to_jpg_output.zip")
 
     $task.DownloadFile($downloadDest)
 
