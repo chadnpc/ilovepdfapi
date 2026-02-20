@@ -1,8 +1,7 @@
-# [ilovepdfapi](https://www.powershellgallery.com/packages/ilovepdfapi)
+# [ilovepdfapi](https://www.iloveapi.com/docs/pdf-guides/getting-started)
 
 PowerShell module for iLovePDF API - manipulate PDFs with ease.
 
-[![Build Module](https://github.com/chadnpc/ilovepdfapi/actions/workflows/build_module.yaml/badge.svg)](https://github.com/chadnpc/ilovepdfapi/actions/workflows/build_module.yaml)
 [![Downloads](https://img.shields.io/powershellgallery/dt/ilovepdfapi.svg?style=flat&logo=powershell&color=blue)](https://www.powershellgallery.com/packages/ilovepdfapi)
 
 ## Installation
