@@ -1228,8 +1228,8 @@ class EditTask : iLovePdfTask {
 #region HTTP Helpers
 
 class RequestHelper {
-  static hidden [securestring]$cached_PubKey = [RequestHelper]::get_ILOVEAPIKey([KeyType]::PublicKey)
-  static hidden [securestring]$cached_PrivKey = [RequestHelper]::get_ILOVEAPIKey([KeyType]::PrivateKey)
+  static hidden [securestring]$cached_PubKey = [RequestHelper]::get_ILOVEAPIKey("Public")
+  static hidden [securestring]$cached_PrivKey = [RequestHelper]::get_ILOVEAPIKey("Private")
 
   static [string] GetJwt() {
     $pubKey = [RequestHelper]::cached_PubKey
@@ -1381,14 +1381,13 @@ class RequestHelper {
     Invoke-WebRequest -Uri $url -Method Get -Headers $headers -OutFile $destinationPath
   }
   static hidden [securestring] get_ILOVEAPIKey([KeyType]$keyType) {
-    $key = $null
     if ([IO.File]::Exists([IO.Path]::GetFullPath("$(Get-Location)\.env"))) {
-      $key = (Get-Env -Name "ILOVEAPI_$($keyType.ToString().ToUpper())" -Path .env).Value | xconvert ToSecurestring
+      return (Get-Env -Name "ILOVEAPI_$($keyType.ToString().ToUpper())" -Path "$(Get-Location)\.env").Value | xconvert ToSecurestring
     }
     elseif (![string]::IsNullOrWhiteSpace([System.Environment]::GetEnvironmentVariable("ILOVEAPI_$($keyType.ToString().ToUpper())"))) {
-      $key = [System.Environment]::GetEnvironmentVariable("ILOVEAPI_$($keyType.ToString().ToUpper())") | xconvert ToSecurestring
+      return [System.Environment]::GetEnvironmentVariable("ILOVEAPI_$($keyType.ToString().ToUpper())") | xconvert ToSecurestring
     }
-    return $key
+    return $null
   }
 }
 
