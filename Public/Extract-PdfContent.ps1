@@ -1,4 +1,5 @@
-function Extract-PdfContent {
+function Get-PdfContent {
+  [Alias('Extract-PdfContent')]
   [CmdletBinding()]
   param(
     [Parameter(Mandatory, ValueFromPipeline)]
