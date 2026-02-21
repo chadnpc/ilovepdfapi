@@ -50,6 +50,11 @@ enum LovePdfErrors {
   SignatureError
 }
 
+enum KeyType {
+  Public
+  Private
+}
+
 enum ConformanceValues {
   PdfA1B
   PdfA1A
@@ -1223,6 +1228,16 @@ class EditTask : iLovePdfTask {
 #region HTTP Helpers
 
 class RequestHelper {
+  static hidden [securestring]$cached_PubKey = [RequestHelper]::get_ILOVEAPIKey([KeyType]::PublicKey)
+  static hidden [securestring]$cached_PrivKey = [RequestHelper]::get_ILOVEAPIKey([KeyType]::PrivateKey)
+
+  static [string] GetJwt() {
+    $pubKey = [RequestHelper]::cached_PubKey
+    $privKey = [RequestHelper]::cached_PrivKey
+    $pubKey = ($null -ne $pubKey) ? ($pubKey | xconvert Tostring) : (throw [System.ArgumentException]::new("CACHED public key is null", "publicKey"))
+    $privKey = ($null -ne $privKey) ? ($privKey | xconvert Tostring) : (throw [System.ArgumentException]::new("CACHED private key is null", "privateKey"))
+    return [RequestHelper]::GetJwt($pubKey, $privKey)
+  }
   static [string] GetJwt([string]$publicKey, [string]$privateKey) {
     $header = @{
       alg = "HS256"
@@ -1365,6 +1380,16 @@ class RequestHelper {
 
     Invoke-WebRequest -Uri $url -Method Get -Headers $headers -OutFile $destinationPath
   }
+  static hidden [securestring] get_ILOVEAPIKey([KeyType]$keyType) {
+    $key = $null
+    if ([IO.File]::Exists([IO.Path]::GetFullPath("$(Get-Location)\.env"))) {
+      $key = (Get-Env -Name "ILOVEAPI_$($keyType.ToString().ToUpper())" -Path .env).Value | xconvert ToSecurestring
+    }
+    elseif (![string]::IsNullOrWhiteSpace([System.Environment]::GetEnvironmentVariable("ILOVEAPI_$($keyType.ToString().ToUpper())"))) {
+      $key = [System.Environment]::GetEnvironmentVariable("ILOVEAPI_$($keyType.ToString().ToUpper())") | xconvert ToSecurestring
+    }
+    return $key
+  }
 }
 
 #endregion HTTP Helpers
@@ -1388,8 +1413,8 @@ class ilovepdfapi {
   }
 
   [iLovePdfTask] CreateTask([type]$TaskType) {
-    if (-not $TaskType.IsSubclassOf([iLovePdfTask])) {
-      throw "TaskType must inherit from iLovePdfTask"
+    if (!$TaskType.IsSubclassOf([iLovePdfTask])) {
+      throw [System.InvalidOperationException]::new("TaskType must inherit from iLovePdfTask")
     }
 
     $instance = $TaskType::new()
@@ -1405,8 +1430,8 @@ class ilovepdfapi {
   }
 
   [iLovePdfTask] ConnectTask([iLovePdfTask]$parent, [type]$TaskType) {
-    if (-not $TaskType.IsSubclassOf([iLovePdfTask])) {
-      throw "TaskType must inherit from iLovePdfTask"
+    if (!$TaskType.IsSubclassOf([iLovePdfTask])) {
+      throw [System.InvalidOperationException]::new("TaskType must inherit from iLovePdfTask")
     }
 
     $instance = $TaskType::new()
